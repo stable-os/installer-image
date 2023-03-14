@@ -22,8 +22,8 @@ jobs:
 
     steps:
 
-      - name: Installer extlinux
-        run: sudo apt update && sudo apt install extlinux
+      - name: Installer extlinux and qemu-utils
+        run: sudo apt update && sudo apt install extlinux qemu-utils
 
       - name: Install d2vm
         run: |
