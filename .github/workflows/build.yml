@@ -28,6 +28,9 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Build installer image
+        run: docker build . --tag stable-os-installer:latest
+
       - run: lsblk
 
       - name: Select drive
@@ -42,8 +45,8 @@ jobs:
       #- name: Create virtual disk ±5gb
       #  run: sudo dd if=/dev/zero of=/media/VHD.img bs=1M count=5000 && sudo mkfs -t ext4 /media/VHD.img
 
-      - name: try to install fedora to the virtual disk
-        run: sudo docker run --privileged --pid=host --net=none --security-opt label=type:unconfined_t ghcr.io/cgwalters/fedora-oscore bootc install --target-no-signature-verification /dev/${{ env.DRIVE }}
+      - name: try to install the image to the virtual disk
+        run: sudo docker run --privileged --pid=host --net=none --security-opt label=type:unconfined_t stable-os-installer:latest bootc install --target-no-signature-verification /dev/${{ env.DRIVE }}
 
       #- name: Mount virtual disk
       #  run: sudo mkdir /mnt/VHD/ && sudo mount -t auto -o loop /media/VHD.img /mnt/VHD/
