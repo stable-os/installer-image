@@ -75,10 +75,10 @@ jobs:
           EOF
 
           OFFSET=$(expr 512 \* 2048)
-          sudo losetup -o ${OFFSET} /dev/loop0 /media/linux.img
-          sudo mkfs.ext3 /dev/loop0
+          sudo losetup -o ${OFFSET} /dev/loop5 /media/linux.img
+          sudo mkfs.ext3 /dev/loop5
           sudo mkdir /media/mnt
-          sudo mount -t auto /dev/loop0 /media/mnt/
+          sudo mount -t auto /dev/loop5 /media/mnt/
 
       - name: Install image and bootloader to virtual disk
         run: |
