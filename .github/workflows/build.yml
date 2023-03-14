@@ -28,7 +28,7 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       
-      - run: ls
+      - run: cd && ls
 
       - name: Build installer image
         run: docker build . --tag stable-os-installer:latest
