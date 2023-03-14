@@ -1,18 +1,7 @@
-# We always use the latest stable Fedora image, never rawhide
-FROM fedora:latest
-
-WORKDIR /workdir
-
-# Install bootc repo
-COPY bootc-fedora.repo .
-RUN dnf install 'dnf-command(config-manager)' --assumeyes
-RUN dnf config-manager --add-repo /workdir/bootc-fedora.repo --assumeyes
-
-# Update package sources
-RUN dnf update
-
-# Install boot and kernel stuff
-RUN dnf install bootc systemd kernel --assumeyes
-
-# Install LXQT
-RUN dnf group install "LXQt Desktop" --assumeyes
+# BASED ON ALPINE BC STORAGE NEEDS
+FROM amd64/alpine:3.13.5
+LABEL com.iximiuz-project="docker-to-linux"
+RUN apk update
+RUN apk add openrc linux-virt
+RUN echo "root:root" | chpasswd
+RUN rc-update add root

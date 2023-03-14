@@ -1,4 +1,4 @@
-name: build-install-image
+name: old-build-install-image
 on:
   pull_request:
     branches:
@@ -21,8 +21,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Install mkisofs and extlinux
-        run: sudo apt update && sudo apt install mkisofs extlinux
+      - name: Install d2vm
+        run: |
+          VERSION=$(git ls-remote --tags https://github.com/linka-cloud/d2vm |cut -d'/' -f 3|tail -n 1)
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$([ "$(uname -m)" = "x86_64" ] && echo "amd64" || echo "arm64")
+          curl -sL "https://github.com/linka-cloud/d2vm/releases/download/${VERSION}/d2vm_${VERSION}_${OS}_${ARCH}.tar.gz" | tar -xvz d2vm
+          sudo mv d2vm /usr/local/bin/
 
       -
         name: Set up Docker Buildx
@@ -42,73 +47,11 @@ jobs:
 
       - run: lsblk
 
-      - name: Select drive
-        run: |
-          DRIVES=$(lsblk | grep 14G)
-          DRIVE=$(echo $DRIVES | cut -d " " -f 1)
-          echo $DRIVES
-          echo $DRIVE
-          
-          echo "DRIVE=$DRIVE" >> $GITHUB_ENV
+      - name: Convert to vm file
+        run: sudo d2vm convert stable-os-installer -o /tmp/linux.qcow2 -p installer
 
-      #- name: try to install the image to the virtual disk
-      #  run: sudo docker run --privileged --pid=host --net=none stable-os-installer:latest ls
-        #run: sudo docker run --privileged --pid=host --net=none stable-os-installer:latest bootc install --target-no-signature-verification /dev/${{ env.DRIVE }}
-
-      #- name: Mount virtual disk
-      #  run: sudo mkdir /mnt/VHD/ && sudo mount -t auto -o loop /media/VHD.img /mnt/VHD/
-
-      - name: Export container filesystem
-        run: |
-          CID=$(docker run -d stable-os-installer /bin/true)
-          docker export -o linux.tar ${CID}
-          tar -tf linux.tar | grep -E '^[^/]*/?$'
-
-      - name: Create virtual disk ±5gb
-        run: |
-          IMG_SIZE=$(expr 1024 \* 1024 \* 1024)
-          sudo dd if=/dev/zero of=/tmp/linux.img bs=${IMG_SIZE} count=1
-          #sudo mkfs -t ext4 /media/VHD.img
-          
-          sudo sfdisk /tmp/linux.img <<EOF
-          label: dos
-          label-id: 0x5d8b75fc
-          device: new.img
-          unit: sectors
-
-          linux.img1 : start=2048, size=2095104, type=83, bootable
-          EOF
-
-          OFFSET=$(expr 512 \* 2048)
-          sudo losetup -o ${OFFSET} /dev/loop5 /tmp/linux.img
-          sudo mkfs.ext3 /dev/loop5
-          sudo mkdir /media/mnt
-          sudo mount -t auto /dev/loop5 /media/mnt/
-
-      - name: Install image and bootloader to virtual disk
-        run: |
-          sudo tar -xvf linux.tar -C /media/mnt/
-
-          sudo extlinux --install /media/mnt/boot/
-          sudo cat > /media/mnt/boot/syslinux.cfg <<EOF
-          DEFAULT linux
-            SAY Now booting the kernel from SYSLINUX...
-           LABEL linux
-            KERNEL /vmlinuz
-            APPEND ro root=/dev/sda1 initrd=/initrd.img
-          EOF
-          sudo dd if=/usr/lib/syslinux/mbr/mbr.bin of=/tmp/linux.img bs=440 count=1 conv=notrunc
-
-          sudo umount /media/mnt
-
-
-
-      #- name: Create ISO file
-        #run: sudo mkisofs -o /media/iso.iso /mnt/VHD/
-      #  run: sudo mkisofs -o /media/iso.iso /dev/${{ env.DRIVE }}
-
-      - name: Upload img file
+      - name: Upload qcow2 file
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-i-think
-          path: /tmp/linux.img
+          path: /tmp/linux.qcow2
