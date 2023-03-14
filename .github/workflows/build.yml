@@ -75,26 +75,26 @@ jobs:
           EOF
 
           OFFSET=$(expr 512 \* 2048)
-          losetup -o ${OFFSET} /dev/loop0 /media/linux.img
-          mkfs.ext3 /dev/loop0
-          mkdir /media/mnt
-          mount -t auto /dev/loop0 /media/mnt/
+          sudo losetup -o ${OFFSET} /dev/loop0 /media/linux.img
+          sudo mkfs.ext3 /dev/loop0
+          sudo mkdir /media/mnt
+          sudo mount -t auto /dev/loop0 /media/mnt/
 
       - name: Install image and bootloader to virtual disk
         run: |
-          tar -xvf linux.tar -C /media/mnt/
+          sudo tar -xvf linux.tar -C /media/mnt/
 
-          extlinux --install /media/mnt/boot/
-          cat > /media/mnt/boot/syslinux.cfg <<EOF
+          sudo extlinux --install /media/mnt/boot/
+          sudo cat > /media/mnt/boot/syslinux.cfg <<EOF
           DEFAULT linux
             SAY Now booting the kernel from SYSLINUX...
            LABEL linux
             KERNEL /vmlinuz
             APPEND ro root=/dev/sda1 initrd=/initrd.img
           EOF
-          dd if=/usr/lib/syslinux/mbr/mbr.bin of=/media/linux.img bs=440 count=1 conv=notrunc
+          sudo dd if=/usr/lib/syslinux/mbr/mbr.bin of=/media/linux.img bs=440 count=1 conv=notrunc
 
-          umount /media/mnt
+          sudo umount /media/mnt
 
 
 
