@@ -6,7 +6,7 @@ WORKDIR /workdir
 # Install bootc repo
 COPY bootc-fedora.repo .
 RUN dnf install 'dnf-command(config-manager)' --assumeyes
-RUN dnf config-manager --ad-repo /workdir/bootc-fedora.repo --assumeyes
+RUN dnf config-manager --add-repo /workdir/bootc-fedora.repo --assumeyes
 
 # Update package sources
 RUN dnf update
