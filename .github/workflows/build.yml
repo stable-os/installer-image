@@ -29,11 +29,9 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
+        run: |
+          sudo apt remove --purge dotnet-sdk-6.0
+          sudo apt remove --purge dotnet-runtime-6.0
 
       - uses: actions/checkout@v3
       
