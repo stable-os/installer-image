@@ -25,8 +25,8 @@ jobs:
         run: sudo apt update && sudo apt install podman mkisofs
 
       - name: Create virtual disk ±5gb
-        run: | 
-        sudo dd if=/dev/zero of=/media/VHD.img bs=1M count=5000 \
+        run: |
+        sudo dd if=/dev/zero of=/media/VHD.img bs=1M count=5000
         sudo mkfs -t ext4 /media/VHD.img
 
       - name: try to install c9s to the virtual disk
@@ -34,7 +34,7 @@ jobs:
 
       - name: Mount virtual disk
         run: | 
-        sudo mkdir /mnt/VHD/ \
+        sudo mkdir /mnt/VHD/
         sudo mount -t auto -o loop /media/VHD.img /mnt/VHD/
 
       - name: Create ISO file
