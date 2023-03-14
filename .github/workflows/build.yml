@@ -21,8 +21,8 @@ jobs:
       contents: read
 
     steps:
-      - name: Install mkisofs
-        run: sudo apt update && sudo apt install mkisofs
+      - name: Install mkisofs and extlinux
+        run: sudo apt update && sudo apt install mkisofs extlinux
 
       -
         name: Set up Docker Buildx
@@ -46,22 +46,64 @@ jobs:
           
           echo "DRIVE=$DRIVE" >> $GITHUB_ENV
 
-      #- name: Create virtual disk ±5gb
-      #  run: sudo dd if=/dev/zero of=/media/VHD.img bs=1M count=5000 && sudo mkfs -t ext4 /media/VHD.img
-
-      - name: try to install the image to the virtual disk
-        run: sudo docker run --privileged --pid=host --net=none stable-os-installer:latest ls
+      #- name: try to install the image to the virtual disk
+      #  run: sudo docker run --privileged --pid=host --net=none stable-os-installer:latest ls
         #run: sudo docker run --privileged --pid=host --net=none stable-os-installer:latest bootc install --target-no-signature-verification /dev/${{ env.DRIVE }}
 
       #- name: Mount virtual disk
       #  run: sudo mkdir /mnt/VHD/ && sudo mount -t auto -o loop /media/VHD.img /mnt/VHD/
 
-      - name: Create ISO file
-        #run: sudo mkisofs -o /media/iso.iso /mnt/VHD/
-        run: sudo mkisofs -o /media/iso.iso /dev/${{ env.DRIVE }}
+      - name: Export container filesystem
+        run: |
+          CID=$(docker run -d mydebian /bin/true)
+          docker export -o linux.tar ${CID}
+          tar -tf linux.tar | grep -E '^[^/]*/?$'
 
-      - name: Upload ISO file
+      - name: Create virtual disk ±5gb
+        run: |
+          IMG_SIZE=$(expr 1024 \* 1024 \* 1024)
+          sudo dd if=/dev/zero of=/media/linux.img bs=${IMG_SIZE} count=1
+          #sudo mkfs -t ext4 /media/VHD.img
+          
+          sfdisk /media/linux.img <<EOF
+          label: dos
+          label-id: 0x5d8b75fc
+          device: new.img
+          unit: sectors
+
+          linux.img1 : start=2048, size=2095104, type=83, bootable
+          EOF
+
+          OFFSET=$(expr 512 \* 2048)
+          losetup -o ${OFFSET} /dev/loop0 /media/linux.img
+          mkfs.ext3 /dev/loop0
+          mkdir /media/mnt
+          mount -t auto /dev/loop0 /media/mnt/
+
+      - name: Install image and bootloader to virtual disk
+        run: |
+          tar -xvf linux.tar -C /media/mnt/
+
+          extlinux --install /media/mnt/boot/
+          cat > /media/mnt/boot/syslinux.cfg <<EOF
+          DEFAULT linux
+            SAY Now booting the kernel from SYSLINUX...
+           LABEL linux
+            KERNEL /vmlinuz
+            APPEND ro root=/dev/sda1 initrd=/initrd.img
+          EOF
+          dd if=/usr/lib/syslinux/mbr/mbr.bin of=/media/linux.img bs=440 count=1 conv=notrunc
+
+          umount /media/mnt
+
+
+
+      #- name: Create ISO file
+        #run: sudo mkisofs -o /media/iso.iso /mnt/VHD/
+      #  run: sudo mkisofs -o /media/iso.iso /dev/${{ env.DRIVE }}
+
+      - name: Upload img file
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-i-think
-          path: /media/iso.iso
+          path: /media/linux.img
