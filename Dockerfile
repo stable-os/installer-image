@@ -5,15 +5,14 @@ WORKDIR /workdir
 
 # Install bootc repo
 COPY bootc-fedora.repo .
-RUN dnf install 'dnf-command(config-manager)'
+RUN dnf install 'dnf-command(config-manager)' --yes
 RUN dnf config-manager --ad-repo /workdir/bootc-fedora.repo
 
 # Update package sources
 RUN dnf update
 
 # Install boot and kernel stuff
-RUN dnf install bootc systemd kernel
+RUN dnf install bootc systemd kernel --yes
 
 # Install LXQT
-RUN dnf install group install "LXQt Desktop"
-
+RUN dnf install group install "LXQt Desktop" --yes
