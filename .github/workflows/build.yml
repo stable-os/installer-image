@@ -57,14 +57,14 @@ jobs:
       - name: Mount vm file
         run: mount /tmp/linux_image /mnt/linux_image
 
-      - name: Create iso file
-        run: sudo mkisofs -o /tmp/linux_image.iso /mnt/linux_image
+      #- name: Create iso file
+      #  run: sudo mkisofs -o /tmp/linux_image.iso /mnt/linux_image
 
-      - name: Upload iso file
-        uses: actions/upload-artifact@v3
-        with:
-          name: x86_64-iso
-          path: /tmp/linux_image.iso
+      #- name: Upload iso file
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: x86_64-iso
+      #    path: /tmp/linux_image.iso
 
       - name: Upload vm file
         uses: actions/upload-artifact@v3
