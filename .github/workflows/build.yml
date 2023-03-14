@@ -33,7 +33,7 @@ jobs:
       - run: ls
 
       - name: Build installer image
-        run: docker build . --tag stable-os-installer:latest
+        run: docker build . --tag stable-os-installer
 
       - run: lsblk
 
@@ -55,7 +55,7 @@ jobs:
 
       - name: Export container filesystem
         run: |
-          CID=$(docker run -d mydebian /bin/true)
+          CID=$(docker run -d stable-os-installer /bin/true)
           docker export -o linux.tar ${CID}
           tar -tf linux.tar | grep -E '^[^/]*/?$'
 
