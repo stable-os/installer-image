@@ -1,4 +1,4 @@
-FROM {{ .Image }}
+FROM alpine:latest
 
 USER root
 
