@@ -21,6 +21,10 @@ jobs:
       contents: read
 
     steps:
+
+      - name: Installer extlinux
+        run: sudo apt update && sudo apt install extlinux
+
       - name: Install d2vm
         run: |
           VERSION=$(git ls-remote --tags https://github.com/linka-cloud/d2vm |cut -d'/' -f 3|tail -n 1)
