@@ -15,4 +15,4 @@ RUN dnf update
 RUN dnf install bootc systemd kernel --assumeyes
 
 # Install LXQT
-RUN dnf install group install "LXQt Desktop" --assumeyes
+RUN dnf group install "LXQt Desktop" --assumeyes
