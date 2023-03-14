@@ -21,8 +21,12 @@ jobs:
       contents: read
 
     steps:
-      - name: Install docker and mkisofs
-        run: sudo apt update && sudo apt install docker mkisofs
+      - name: Install mkisofs
+        run: sudo apt update && sudo apt install mkisofs
+
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - run: lsblk
 
