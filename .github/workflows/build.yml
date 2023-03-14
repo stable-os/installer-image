@@ -67,10 +67,10 @@ jobs:
       - name: Create virtual disk ±5gb
         run: |
           IMG_SIZE=$(expr 1024 \* 1024 \* 1024)
-          sudo dd if=/dev/zero of=/media/linux.img bs=${IMG_SIZE} count=1
+          sudo dd if=/dev/zero of=/tmp/linux.img bs=${IMG_SIZE} count=1
           #sudo mkfs -t ext4 /media/VHD.img
           
-          sudo sfdisk /media/linux.img <<EOF
+          sudo sfdisk /tmp/linux.img <<EOF
           label: dos
           label-id: 0x5d8b75fc
           device: new.img
@@ -80,7 +80,7 @@ jobs:
           EOF
 
           OFFSET=$(expr 512 \* 2048)
-          sudo losetup -o ${OFFSET} /dev/loop5 /media/linux.img
+          sudo losetup -o ${OFFSET} /dev/loop5 /tmp/linux.img
           sudo mkfs.ext3 /dev/loop5
           sudo mkdir /media/mnt
           sudo mount -t auto /dev/loop5 /media/mnt/
@@ -97,7 +97,7 @@ jobs:
             KERNEL /vmlinuz
             APPEND ro root=/dev/sda1 initrd=/initrd.img
           EOF
-          sudo dd if=/usr/lib/syslinux/mbr/mbr.bin of=/media/linux.img bs=440 count=1 conv=notrunc
+          sudo dd if=/usr/lib/syslinux/mbr/mbr.bin of=/tmp/linux.img bs=440 count=1 conv=notrunc
 
           sudo umount /media/mnt
 
@@ -111,4 +111,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: x86_64-i-think
-          path: /media/linux.img
+          path: /tmp/linux.img
