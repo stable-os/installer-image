@@ -22,8 +22,8 @@ jobs:
 
     steps:
 
-      - name: Installer extlinux and qemu-utils
-        run: sudo apt update && sudo apt install extlinux qemu-utils
+      - name: Installer extlinux, qemu-utils and mkisofs
+        run: sudo apt update && sudo apt install extlinux qemu-utils mkisofs
 
       - name: Install d2vm
         run: |
@@ -52,10 +52,22 @@ jobs:
       - run: lsblk
 
       - name: Convert to vm file
-        run: sudo d2vm convert stable-os-installer -o /tmp/linux.qcow2 -p installer
+        run: sudo d2vm convert stable-os-installer -o /tmp/linux_image -p installer
 
-      - name: Upload qcow2 file
+      - name: Mount vm file
+        run: mount -o loop /tmp/linux_image /mnt/linux_image
+
+      - name: Create iso file
+        run: sudo mkisofs -o /tmp/linux_image.iso /mnt/linux_image
+
+      - name: Upload iso file
         uses: actions/upload-artifact@v3
         with:
-          name: x86_64-i-think
-          path: /tmp/linux.qcow2
+          name: x86_64-iso
+          path: /tmp/linux_image.iso
+
+      - name: Upload vm file
+        uses: actions/upload-artifact@v3
+        with:
+          name: x86_64-image
+          path: /tmp/linux_image
