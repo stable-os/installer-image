@@ -65,7 +65,7 @@ jobs:
           sudo dd if=/dev/zero of=/media/linux.img bs=${IMG_SIZE} count=1
           #sudo mkfs -t ext4 /media/VHD.img
           
-          sfdisk /media/linux.img <<EOF
+          sudo sfdisk /media/linux.img <<EOF
           label: dos
           label-id: 0x5d8b75fc
           device: new.img
