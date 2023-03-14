@@ -55,7 +55,7 @@ jobs:
         run: sudo d2vm convert stable-os-installer -o /tmp/linux_image -p installer
 
       - name: Mount vm file
-        run: mount -o loop /tmp/linux_image /mnt/linux_image
+        run: mount /tmp/linux_image /mnt/linux_image
 
       - name: Create iso file
         run: sudo mkisofs -o /tmp/linux_image.iso /mnt/linux_image
