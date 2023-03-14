@@ -25,7 +25,7 @@ jobs:
         run: sudo apt update && sudo apt install podman mkisofs
 
       - name: Create virtual disk ±5gb
-        run: |
+        run: | 
         sudo dd if=/dev/zero of=/media/VHD.img bs=1M count=5000 \
         sudo mkfs -t ext4 /media/VHD.img
 
@@ -33,7 +33,7 @@ jobs:
         run: podman run --privileged --pid=host --net=none --security-opt label=type:unconfined_t ghcr.io/cgwalters/c9s-oscore bootc install --target-no-signature-verification /media/VHD.img
 
       - name: Mount virtual disk
-        run: |
+        run: | 
         sudo mkdir /mnt/VHD/ \
         sudo mount -t auto -o loop /media/VHD.img /mnt/VHD/
 
