@@ -24,7 +24,7 @@ jobs:
     steps:
 
       - name: Install packages
-        run: dnf install livecd-tools spin-kickstarts -y
+        run: dnf install livecd-tools spin-kickstarts pykickstart -y
 
       - uses: actions/checkout@v3
       
