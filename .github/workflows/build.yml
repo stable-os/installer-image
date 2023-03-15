@@ -44,8 +44,8 @@ jobs:
 
       - run: lsblk
 
-      #- name: Upload vm file
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: x86_64-image
-      #    path: /tmp/linux_image
+      - name: Upload ISO file
+        uses: actions/upload-artifact@v3
+        with:
+          name: x86_64-iso
+          path: StableOS-LiveCD.iso
