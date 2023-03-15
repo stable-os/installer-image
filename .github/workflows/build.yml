@@ -16,58 +16,35 @@ on:
 jobs:
   create-installer:
     name: Build and push image
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    container:
+      image: fedora
     steps:
 
-      - name: Installer extlinux, qemu-utils and mkisofs
-        run: sudo apt update && sudo apt install extlinux qemu-utils mkisofs
-
-      - name: Install d2vm
-        run: |
-          VERSION=$(git ls-remote --tags https://github.com/linka-cloud/d2vm |cut -d'/' -f 3|tail -n 1)
-          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-          ARCH=$([ "$(uname -m)" = "x86_64" ] && echo "amd64" || echo "arm64")
-          curl -sL "https://github.com/linka-cloud/d2vm/releases/download/${VERSION}/d2vm_${VERSION}_${OS}_${ARCH}.tar.gz" | tar -xvz d2vm
-          sudo mv d2vm /usr/local/bin/
-
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Maximize build space
-        run: |
-          sudo apt remove --purge dotnet-sdk-6.0
-          sudo apt remove --purge dotnet-runtime-6.0
+      - name: Install packages
+        run: dnf install livecd-tools spin-kickstarts
 
       - uses: actions/checkout@v3
       
       - run: ls
 
-      - name: Build installer image
-        run: docker build . --tag stable-os-installer
+      - name: Create live image
+        run: |
+          ksflatten -c live_installer.ks \
+          -o live_installer.ks
+          livecd-creator --verbose \
+          --config=live_installer.ks \
+          --fslabel=StableOS-LiveCD \
+          --cache=/var/cache/live
+
+      - run: ls
 
       - run: lsblk
 
-      - name: Convert to vm file
-        run: sudo d2vm convert stable-os-installer -o /tmp/linux_image -p installer
-
-      #- name: Mount vm file
-      #  run: mount /tmp/linux_image /mnt/linux_image
-
-      #- name: Create iso file
-      #  run: sudo mkisofs -o /tmp/linux_image.iso /mnt/linux_image
-
-      #- name: Upload iso file
+      #- name: Upload vm file
       #  uses: actions/upload-artifact@v3
       #  with:
-      #    name: x86_64-iso
-      #    path: /tmp/linux_image.iso
-
-      - name: Upload vm file
-        uses: actions/upload-artifact@v3
-        with:
-          name: x86_64-image
-          path: /tmp/linux_image
+      #    name: x86_64-image
+      #    path: /tmp/linux_image
