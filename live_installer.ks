@@ -21,18 +21,18 @@ services --enabled=NetworkManager,ModemManager --disabled=sshd
 network --bootproto=dhcp --device=link --activate
 rootpw --lock --iscrypted locked
 shutdown
+
+
 %include fedora-repo.ks
+
+
 %packages
 # Explicitly specified here:
 # <notting> walters: because otherwise dependency loops cause yum issues.
 kernel
 kernel-modules
 kernel-modules-extra
-# The point of a live image is to install
-anaconda
-anaconda-install-env-deps
-anaconda-live
-@anaconda-tools
+
 # Anaconda has a weak dep on this and we don't want it on livecds, see
 # https://fedoraproject.org/wiki/Changes/RemoveDeviceMapperMultipathFromWorkstationLiveCD
 -fcoe-utils
@@ -46,6 +46,8 @@ glibc-all-langpacks
 # provide the livesys scripts
 livesys-scripts
 %end
+
+
 %post
 # Enable livesys services
 systemctl enable livesys.service
@@ -87,18 +89,10 @@ touch /etc/machine-id
 %end
 
 
-
-# From fedora-workstation-common.ks
 %packages
-# Exclude unwanted groups that fedora-live-base.ks pulls in
--@dial-up
--@input-methods
--@standard
-# Install workstation-product-environment to resolve RhBug:1891500
-@^workstation-product-environment
-# Exclude unwanted packages from @anaconda-tools group
--gfs2-utils
--reiserfs-utils
+# Install LXQT and minimal environment
+@^lxqt-desktop-environment
+@^minimal-environment
 %end
 
 
@@ -115,5 +109,5 @@ touch /etc/machine-id
 part / --size 7750
 %post
 # set livesys session type
-sed -i 's/^livesys_session=.*/livesys_session="gnome"/' /etc/sysconfig/livesys
+sed -i 's/^livesys_session=.*/livesys_session="lxqt"/' /etc/sysconfig/livesys
 %end
