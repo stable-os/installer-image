@@ -93,6 +93,14 @@ touch /etc/machine-id
 # Install LXQT and minimal environment
 @^lxqt-desktop-environment
 @^workstation-product-environment
+
+# Exlucde some stuff
+-@dial-up
+-@input-methods
+-@standard
+
+# Exclude Gnome
+-@gnome-desktop
 %end
 
 
