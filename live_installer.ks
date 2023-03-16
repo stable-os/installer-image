@@ -92,7 +92,7 @@ touch /etc/machine-id
 %packages
 # Install LXQT and minimal environment
 @^lxqt-desktop-environment
-@^minimal-environment
+@^workstation-product-environment
 %end
 
 
